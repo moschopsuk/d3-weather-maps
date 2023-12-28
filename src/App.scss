@@ -1,0 +1,61 @@
+.background {
+    fill: none;
+    pointer-events: all;
+}
+  
+#states {
+    fill: none;
+    stroke: #fff;
+    stroke-linejoin: round;
+    stroke-width: 1.5px;
+}
+
+#states .active {
+    display: none;
+}
+
+.country-boundary {
+    stroke: #fff;
+    stroke-width: 0.5px;
+}
+
+.warm-front {
+    stroke: #ff0000;
+    stroke-width: 2px;
+
+    &.shape {
+        fill: #ff0000;
+        stroke-width: 0;
+    }
+}
+
+.cold-front {
+    stroke: #0000ff;
+    stroke-width: 2px;
+
+    &.shape {
+        fill: #0000ff;
+        stroke-width: 0;
+    }
+}
+
+.stationary-front {
+    stroke: #000;
+    stroke-width: 2px;
+}
+
+.occluded-front {
+    stroke: #912CED;
+    stroke-width: 2px;
+
+    &.shape {
+        fill: #912CED;
+        stroke-width: 0;
+    }
+}
+
+.trough {
+    stroke: #7B7B7B;
+    stroke-width: 2px;
+    stroke-dasharray: 5, 3;
+}
