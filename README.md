@@ -14,3 +14,4 @@ pnpm run dev
 - [x] Render frontal paths and symbols
 - [ ] Add setups to convert IAC fleetcode to geojson format
 - [ ] Fix Stationary front colour rendering
+- [ ] Render High and Low Pressure points
