@@ -1,5 +1,6 @@
 # D3 Weather Maps
 Uses IAC fleetcode to render surface pressure charts using D3.
+For more information on the different types of weather fronts and their effects see this [Met Office](https://www.metoffice.gov.uk/weather/learn-about/weather/atmosphere/weather-fronts) aricle.
 
 ![example generated surface map](doc/example.png)
 
