@@ -1,5 +1,5 @@
 import './App.scss';
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import * as d3 from 'd3';
 import countyData from "./data/eur.json";
@@ -34,18 +34,24 @@ function App() {
             l = end.y + r / 2,
             d = a ? s + Math.PI / 2 : s - Math.PI / 2,
             p = a ? s - Math.PI / 2 : s + Math.PI / 2;
-        context.moveTo(c, l), context.arc(c, l, size, d, p);
+        context.moveTo(c, l);
+        context.arc(c, l, size, d, p);
     }
 
     function drawTriangle(start: SVGPoint, end: SVGPoint, context: d3.Path, size: number) {
         const a = start.x - end.x,
             o = start.y - end.y,
             r = Math.atan2(-a, o);
-        context.moveTo(start.x, start.y), context.lineTo(end.x, end.y);
+
+        context.moveTo(start.x, start.y);
+        context.lineTo(end.x, end.y);
+
         const s = end.y + o / 2,
             c = end.x + a / 2 + Math.cos(r) * size,
             l = s + Math.sin(r) * size;
-        context.lineTo(c, l), context.lineTo(start.x, start.y);
+
+        context.lineTo(c, l);
+        context.lineTo(start.x, start.y);
     }
 
     const renderFronts = function(g: d3.Selection<SVGGElement, unknown, null, undefined>) :void {
@@ -121,7 +127,7 @@ function App() {
 
         const projection = d3.geoMercator()
             .scale(4460/Math.PI/2)
-            .translate([480,980])
+            .translate([480,1080])
       
         const pathGenerator = d3.geoPath()
             .projection(projection);
@@ -156,9 +162,30 @@ function App() {
             .attr("class", features => { 
                 return parseFront(features.properties.layer_properties.front_type as string) || ""
             });
-
-               
+                       
         renderFronts(g);
+
+        g.append("g")
+            .attr("id", "pressure-points")
+            .selectAll("text")
+            .data(frontsData.features)
+            .enter()
+            .filter(features => { 
+                return features.properties.layer_name === "PRESSURE_CENTER"
+            })
+            .append("text")
+            .attr("class", features => { 
+                const pc_type = (features.properties.layer_properties.pc_type || "").toLowerCase();
+                return `pressure-centre ${pc_type}`
+            })
+            .attr("x", d => pathGenerator.centroid(d as any)[0])
+            .attr("y", d => pathGenerator.centroid(d as any)[1])
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "central")            
+            .text(features => {
+                const pc_type = features.properties.layer_properties.pc_type;
+                return (pc_type == "HIGH") ? "H" : "L";
+            });
 
     }, []);
 
