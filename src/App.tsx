@@ -111,6 +111,7 @@ function App() {
             .attr('height', height)
             .attr('width', width);
 
+        // Remove any previous layers or else react will overwrite on HWR
         svg.selectAll("*").remove();
 
         svg.append('rect')
