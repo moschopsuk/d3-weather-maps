@@ -26,14 +26,14 @@ function App() {
         }
     };
 
-    function drawCircle(start: SVGPoint, end: SVGPoint, context: d3.Path, size: number, a: boolean) {
+    function drawCircle(start: SVGPoint, end: SVGPoint, context: d3.Path, size: number, flip: boolean) {
         const o = start.x - end.x,
             r = start.y - end.y,
             s = Math.atan2(-o, r),
             c = end.x + o / 2,
             l = end.y + r / 2,
-            d = a ? s + Math.PI / 2 : s - Math.PI / 2,
-            p = a ? s - Math.PI / 2 : s + Math.PI / 2;
+            d = flip ? s + Math.PI / 2 : s - Math.PI / 2,
+            p = flip ? s - Math.PI / 2 : s + Math.PI / 2;
         context.moveTo(c, l);
         context.arc(c, l, size, d, p);
     }
@@ -55,9 +55,14 @@ function App() {
     }
 
     const renderFronts = function(g: d3.Selection<SVGGElement, unknown, null, undefined>) :void {
+        const warm_context = d3.path();
+        const warm_path = d3.path();
+        const cold_context = d3.path();
+        const cold_path = d3.path();
+        const occluded_context = d3.path();
+
         Array.from(g.selectAll("path")).forEach((e: any) => {
 
-            const context = d3.path(); 
             const front_type = e.getAttribute("class");
             const total_length  = e.getTotalLength();
             const dist = total_length / 14;
@@ -70,42 +75,76 @@ function App() {
                 if (!(Math.abs(start.x - end.x) > 20 || Math.abs(start.y - end.y) > 20)) {
                     switch (front_type) {
                         case "warm-front":
-                            drawCircle(start, end, context, 6, false)
+                            drawCircle(start, end, warm_context, 6, false)
                             break;
     
                         case "cold-front":
-                            drawTriangle(start, end, context, 6)
+                            drawTriangle(start, end, cold_context, 6)
                             break;
 
                         case "occluded-front":
                             if (last_shape == "circle") {
-                                drawCircle(start, end, context, 6, false);
+                                drawCircle(start, end, occluded_context, 6, false);
                                 last_shape = "triangle";
                             } else {
-                                drawTriangle(start, end, context, 6);
+                                drawTriangle(start, end, occluded_context, 6);
                                 last_shape = "circle";
                             }
                             break;
 
                         case "stationary-front":
                             if (last_shape == "circle") {
-                                drawCircle(start, end, context, 6, true);
+                                warm_path.moveTo(end.x, end.y);
+                                warm_path.lineTo(start.x, start.y);
+                                drawCircle(start, end, warm_context, 6, true);
+                                warm_path.closePath();
                                 last_shape = "triangle";
                             } else {
-                                drawTriangle(start, end, context, 6);
+                                cold_path.moveTo(end.x, end.y);
+                                cold_path.lineTo(start.x, start.y);
+                                drawTriangle(start, end, cold_context, 6);
+                                cold_path.closePath();
                                 last_shape = "circle";
                             }
                             break;
                     }                    
                 }
             }
+        });
 
-            g.append("g")
+        // There must be a better way to handle this, perhaps I should
+        // draw directly all the lines using the canvas method. But making
+        // dashed lines that change colour in D3.js is a bit of a nightmare.
+        
+        g.append("g")
             .attr("id", "fronts")
             .append("path")
-            .attr("d", context as any)
-            .attr("class", `${front_type} shape`);
-        });
+            .attr("d", warm_context as any)
+            .attr("class", "warm-front shape");
+
+        g.append("g")
+            .attr("id", "fronts")
+            .append("path")
+            .attr("d", cold_context as any)
+            .attr("class", "cold-front shape");
+
+        g.append("g")
+            .attr("id", "fronts")
+            .append("path")
+            .attr("d", occluded_context as any)
+            .attr("class", "occluded-front shape");
+
+        g.append("g")
+            .attr("id", "fronts")
+            .append("path")
+            .attr("d", warm_path as any)
+            .attr("class", "warm-front");
+
+        g.append("g")
+            .attr("id", "fronts")
+            .append("path")
+            .attr("d", cold_path as any)
+            .attr("class", "cold-front");
     }
 
     useEffect(() => {
